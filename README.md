@@ -80,7 +80,7 @@ An AI application that detects and optionally recognizes human faces in images o
 I’m an aspiring AI enthusiast currently interning at **CodSoft** and passionate about building smart, real-world applications.  
 Feel free to check out my other projects or connect with me:
 
-📬 Email: eklavya1675@gmail.com 
+📬 Email: eklavya1675@gmail.com   
 🌐 LinkedIn: [Check Out!](https://www.linkedin.com/in/Eklavya16)  
 🐙 GitHub: [@Eren-Sama](https://github.com/Eren-Sama)
 
