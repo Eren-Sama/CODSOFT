@@ -1,4 +1,4 @@
-<h2 align="center"># 🤖 CodSoft AI Internship Projects</h2>
+<h1 align="center">🤖 CodSoft AI Internship Projects</h1>
 
 Welcome to my CodSoft Internship repository! 🎓  
 During this internship, I'm diving into the world of **Artificial Intelligence (AI)** and building hands-on projects to strengthen my skills in **chatbots, recommendation systems**, and **computer vision**.
