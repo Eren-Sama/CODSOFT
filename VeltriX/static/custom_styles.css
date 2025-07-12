@@ -1,0 +1,19 @@
+.bot-message.weather-response {
+  border-left: 4px solid #38bdf8;
+}
+
+.bot-message.joke-response {
+  border-left: 4px solid #fb923c;
+}
+
+.bot-message.quote-response {
+  border-left: 4px solid #a78bfa;
+}
+
+.bot-message.news-response {
+  border-left: 4px solid #4ade80;
+}
+
+.bot-message.calc-response {
+  border-left: 4px solid #facc15;
+}
