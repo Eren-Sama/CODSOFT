@@ -133,7 +133,6 @@ INTENT_PATTERNS = {
     "multiplication_table": [r"\b(table of \d+|multiplication table for \d+|times table for \d+|show me the \d+ times table|what is the table of \d+|show \d+ table)\b"]
 }
 
-# Keep track of the last intent for context-aware responses
 last_intent = None
 
 def normalize_text(text):
