@@ -80,9 +80,9 @@ An AI application that detects and optionally recognizes human faces in images o
 I’m an aspiring AI enthusiast currently interning at **CodSoft** and passionate about building smart, real-world applications.  
 Feel free to check out my other projects or connect with me:
 
-📬 Email: yourname@example.com  
-🌐 Portfolio: [your-portfolio-link.com](https://your-portfolio-link.com)  
-🐙 GitHub: [@yourusername](https://github.com/yourusername)
+📬 Email: eklavya1675@gmail.com 
+🌐 LinkedIn: [Check Out!](https://www.linkedin.com/in/Eklavya16)  
+🐙 GitHub: [@Eren-Sama](https://github.com/Eren-Sama)
 
 ---
 
@@ -90,6 +90,6 @@ Feel free to check out my other projects or connect with me:
 
 If you find this repository useful or interesting, don’t forget to ⭐ star it and follow for more AI-based projects!
 
-> **"Artificial Intelligence is the new electricity." – Andrew Ng**
+> **"The smartest AI still needs the smartest humans to guide it"**
 
 ---
