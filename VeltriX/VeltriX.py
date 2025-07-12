@@ -529,10 +529,5 @@ def get_response(user_input):
         last_intent = intent
         
     return response
-
-# For debugging - can be removed in production
+    
 if __name__ == "__main__":
-    print("VeltriX Chatbot initialized successfully.")
-    print("Try a test query: 'What's the weather in Delhi?'")
-    test_response = get_response("What's the weather in Delhi?")
-    print(f"Test response: {test_response}")
