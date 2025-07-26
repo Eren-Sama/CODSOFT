@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XenoTic</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <span class="theme-icon" id="themeIcon">🌙</span>
+    </button>
+
+    <!-- Main Container -->
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="title">XenoTic</h1>
+            <p class="subtitle">Minimalist Tic-Tac-Toe</p>
+        </header>
+
+        <!-- Game Controls -->
+        <div class="controls">
+            <select id="difficultySelect" class="control">
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+                <option value="impossible" selected>Impossible</option>
+            </select>
+            
+            <select id="symbolSelect" class="control">
+                <option value="X" selected>X (First)</option>
+                <option value="O">O (Second)</option>
+            </select>
+            
+            <button id="newGameBtn" class="btn btn-primary">New Game</button>
+        </div>
+
+        <!-- Game Status -->
+        <div class="status">
+            <div class="status-item">
+                <span>Player: </span>
+                <span id="currentPlayer" class="status-value">-</span>
+            </div>
+        </div>
+
+        <!-- Game Board -->
+        <div class="board-container">
+            <div id="gameBoard" class="board">
+                <!-- Board cells will be dynamically generated -->
+            </div>
+            
+            <!-- Loading overlay -->
+            <div id="loadingOverlay" class="loading">
+                <div class="spinner"></div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-label">Wins</span>
+                <span id="winsCount" class="stat-value">0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Draws</span>
+                <span id="drawsCount" class="stat-value">0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Losses</span>
+                <span id="lossesCount" class="stat-value">0</span>
+            </div>
+        </div>
+        
+        <!-- Reset Stats -->
+        <div class="reset-stats">
+            <button id="resetStatsBtn" class="btn btn-secondary btn-small">Reset Stats</button>
+        </div>
+    </div>
+
+    <!-- Game Result Modal -->
+    <div id="gameModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Game Over</h2>
+            <p id="modalMessage">Game completed!</p>
+            <div class="modal-actions">
+                <button id="playAgainBtn" class="btn btn-primary">Play Again</button>
+                <button id="newGameModalBtn" class="btn btn-secondary">New Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/simple-game.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ui.js') }}"></script>
+</body>
+</html>
