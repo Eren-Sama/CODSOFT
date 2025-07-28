@@ -28,17 +28,17 @@ A simple chatbot that responds to user inputs based on predefined rules and patt
 
 ---
 
-### 📌 TASK 2: Recommendation System 🎯
+### 📌 TASK 2: XenoTic — Smart AI Tic-Tac-Toe 🧠❌⭕️
 
-A basic system that suggests items to users based on their preferences.
+**XenoTic** is an unbeatable AI agent that plays the classic game of Tic-Tac-Toe against a human player using strategic game logic.
 
-- ✅ Implements **Collaborative Filtering** and **Content-Based Filtering** techniques.
-- ✅ Recommends **movies**, **books**, or **products** based on user data.
-- ✅ Demonstrates the fundamentals of personalization in AI.
+- ✅ Implements the **Minimax algorithm** (with optional **Alpha-Beta Pruning**).
+- ✅ Ensures optimal gameplay and challenges human players.
+- ✅ Clean and intuitive game UI for smooth interaction.
 
-> 💡 **Goal:** Explore how modern platforms like Netflix or Amazon make recommendations.
+> 💡 **Goal:** Learn game theory, adversarial search, and how AI can play strategic games.
 
-🔗 [View Project Folder](./Task-2-Recommendation-System)
+🔗 [View Project Folder](./Task-2-XenoTic-TicTacToe)
 
 ---
 
