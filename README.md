@@ -42,15 +42,15 @@ A simple chatbot that responds to user inputs based on predefined rules and patt
 
 ---
 
-### 📌 TASK 3: Face Detection & Recognition 👁️‍🗨️
+### 📌 TASK 3: Recommendation System 🎯
 
-An AI application that detects and optionally recognizes human faces in images or video.
+A basic system that suggests items to users based on their preferences.
 
-- ✅ Uses **Haar Cascades** and **DNN-based models**.
-- ✅ Integrates **Face Recognition** using **Siamese Networks** or **ArcFace**.
-- ✅ Can be used for authentication, surveillance, and identity verification.
+- ✅ Implements **Collaborative Filtering** and **Content-Based Filtering** techniques.
+- ✅ Recommends **movies**, **books**, or **products** based on user data.
+- ✅ Demonstrates the fundamentals of personalization in AI.
 
-> 💡 **Goal:** Understand real-world computer vision tasks and biometric systems.
+> 💡 **Goal:** Explore how modern platforms like Netflix or Amazon make recommendations.
 
 🔗 [View Project Folder](https://github.com/Eren-Sama/CODSOFT/tree/main/NextFlix)
 
