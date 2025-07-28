@@ -24,7 +24,7 @@ A simple chatbot that responds to user inputs based on predefined rules and patt
 
 > 💡 **Goal:** Understand how chatbots work and how to build conversational agents using rule-based logic.
 
-🔗 [View Project Folder](./Task-1-Chatbot)
+🔗 [View Project Folder](https://github.com/Eren-Sama/CODSOFT/tree/main/VeltriX)
 
 ---
 
@@ -38,7 +38,7 @@ A simple chatbot that responds to user inputs based on predefined rules and patt
 
 > 💡 **Goal:** Learn game theory, adversarial search, and how AI can play strategic games.
 
-🔗 [View Project Folder](./Task-2-XenoTic-TicTacToe)
+🔗 [View Project Folder](https://github.com/Eren-Sama/CODSOFT/tree/main/XenoTic)
 
 ---
 
@@ -52,7 +52,7 @@ An AI application that detects and optionally recognizes human faces in images o
 
 > 💡 **Goal:** Understand real-world computer vision tasks and biometric systems.
 
-🔗 [View Project Folder](./Task-3-Face-Detection-Recognition)
+🔗 [View Project Folder](https://github.com/Eren-Sama/CODSOFT/tree/main/NextFlix)
 
 ---
 
