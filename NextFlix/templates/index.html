@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextFlix - AI-Powered Movie & TV Recommendations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'netflix': ['Inter', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        'netflix-red': '#E50914',
+                        'netflix-black': '#141414',
+                        'netflix-dark': '#0F0F0F',
+                        'netflix-gray': '#333333',
+                        'netflix-light-gray': '#564d4d'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: #141414;
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+        .hero-bg {
+            background: linear-gradient(77deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 85%), 
+                        url('https://images.unsplash.com/photo-1489599134657-8dc1bc4e7ad0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') center/cover;
+            animation: heroParallax 20s ease-in-out infinite;
+        }
+        @keyframes heroParallax {
+            0%, 100% { background-size: 100% auto; }
+            50% { background-size: 110% auto; }
+        }
+        .netflix-card {
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+        }
+        .netflix-card:hover {
+            transform: scale(1.12) translateY(-8px);
+            z-index: 10;
+            box-shadow: 0 35px 80px rgba(229, 9, 20, 0.4), 0 0 40px rgba(229, 9, 20, 0.2);
+        }
+        .netflix-card .poster-zoom {
+            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .netflix-card:hover .poster-zoom {
+            transform: scale(1.08);
+        }
+        .netflix-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+            z-index: 1;
+        }
+        .netflix-card:hover::before {
+            left: 100%;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .loading-spinner {
+            border: 4px solid #333;
+            border-top: 4px solid #E50914;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide-in-left {
+            animation: slideInLeft 0.8s ease-out;
+        }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .pulse-glow {
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(229, 9, 20, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(229, 9, 20, 0.6); }
+        }
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .gradient-text {
+            background: linear-gradient(45deg, #E50914, #FF6B6B, #E50914);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease infinite;
+        }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        .modal-backdrop {
+            backdrop-filter: blur(20px);
+            background: rgba(0, 0, 0, 0.8);
+        }
+        .modal-content {
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.95), rgba(15, 15, 15, 0.98));
+            border: 1px solid rgba(229, 9, 20, 0.3);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7), 0 0 100px rgba(229, 9, 20, 0.1);
+        }
+        .button-hover-effect {
+            position: relative;
+            overflow: hidden;
+        }
+        .button-hover-effect::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .button-hover-effect:hover::before {
+            left: 100%;
+        }
+        .section-divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #E50914, transparent);
+            margin: 4rem 0;
+            opacity: 0.3;
+        }
+        .card-grid-animation {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+        .card-grid-animation .netflix-card {
+            opacity: 0;
+            transform: translateY(50px);
+            animation: cardSlideIn 0.6s ease forwards;
+        }
+        @keyframes cardSlideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .navbar-glass {
+            backdrop-filter: blur(20px);
+            background: rgba(20, 20, 20, 0.9);
+            border-bottom: 1px solid rgba(229, 9, 20, 0.1);
+        }
+        .content-shimmer {
+            background: linear-gradient(90deg, #333 25%, #444 50%, #333 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .genre-btn.selected {
+            background: rgba(229, 9, 20, 0.3) !important;
+            border-color: rgba(229, 9, 20, 0.5) !important;
+            color: #E50914 !important;
+        }
+        .language-btn.selected {
+            background: rgba(34, 197, 94, 0.3) !important;
+            border-color: rgba(34, 197, 94, 0.5) !important;
+            color: rgb(34, 197, 94) !important;
+        }
+        .runtime-btn.selected {
+            background: rgba(168, 85, 247, 0.3) !important;
+            border-color: rgba(168, 85, 247, 0.5) !important;
+            color: rgb(168, 85, 247) !important;
+        }
+        .content-rating-btn.selected {
+            background: rgba(249, 115, 22, 0.3) !important;
+            border-color: rgba(249, 115, 22, 0.5) !important;
+            color: rgb(249, 115, 22) !important;
+        }
+        .era-btn.selected {
+            background: rgba(59, 130, 246, 0.3) !important;
+            border-color: rgba(96, 165, 250, 1) !important;
+            color: rgba(96, 165, 250, 1) !important;
+        }
+        #rating-slider::-webkit-slider-thumb {
+            appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #E50914;
+            cursor: pointer;
+            box-shadow: 0 0 2px 0 rgba(0,0,0,0.2);
+        }
+        #rating-slider::-moz-range-thumb {
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #E50914;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 2px 0 rgba(0,0,0,0.2);
+        }
+        .animation-delay-200 {
+            animation-delay: 0.2s;
+        }
+        .animation-delay-400 {
+            animation-delay: 0.4s;
+        }
+        .animation-delay-1000 {
+            animation-delay: 1s;
+        }
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+    </style>
+</head>
+<body class="bg-netflix-black text-white font-netflix">
+    <!-- Netflix Navigation -->
+    <nav class="fixed top-0 w-full z-50 transition-all duration-500" id="navbar">
+        <div class="container mx-auto px-4 md:px-8 py-4">
+            <div class="flex flex-col items-center">
+                <h1 class="text-netflix-red text-2xl md:text-3xl font-bold gradient-text floating mb-2">NEXTFLIX</h1>
+                <div class="flex justify-center space-x-8">
+                    <a href="#home" onclick="scrollTo('home')" class="text-white hover:text-netflix-red transition-all duration-300 cursor-pointer hover:scale-110">Home</a>
+                    <a href="#trending" onclick="scrollTo('trending')" class="text-white hover:text-netflix-red transition-all duration-300 cursor-pointer hover:scale-110">Trending</a>
+                    <a href="#recommendations" onclick="scrollTo('recommendations')" class="text-white hover:text-netflix-red transition-all duration-300 cursor-pointer hover:scale-110">My List</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-bg min-h-screen flex items-center pt-16">
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="max-w-2xl slide-in-left">
+                <div class="mb-4">
+                    <span class="bg-netflix-red text-white px-4 py-1 rounded-full text-sm font-semibold inline-block animate-pulse">
+                        ✨ AI-Powered Recommendations
+                    </span>
+                </div>
+                <h1 class="text-4xl md:text-7xl font-bold mb-6 leading-tight">
+                    Discover Your Next Favourite <span class="gradient-text">Story</span>
+                </h1>
+                <p class="text-lg md:text-xl text-gray-300 mb-8 leading-relaxed">
+                    Get smart, personalized movie & series recommendations — tailored just for you.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button id="get-started-btn" class="bg-netflix-red hover:bg-red-700 text-white px-10 py-5 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl button-hover-effect pulse-glow">
+                        <i class="fas fa-play mr-3"></i>
+                        Get Started
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Floating Elements -->
+        <div class="absolute top-20 right-10 w-16 h-16 bg-netflix-red/20 rounded-full floating animation-delay-1000"></div>
+        <div class="absolute bottom-40 left-20 w-8 h-8 bg-white/10 rounded-full floating animation-delay-2000"></div>
+    </section>
+
+    <!-- Content Selection Modal -->
+    <div id="content-modal" class="fixed inset-0 modal-backdrop z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="modal-content rounded-2xl p-8 max-w-lg w-full fade-in">
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 bg-netflix-red/20 rounded-full flex items-center justify-center mx-auto mb-4 floating">
+                        <i class="fas fa-magic text-netflix-red text-2xl"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold mb-2">What would you like to watch?</h2>
+                    <p class="text-gray-400">Choose your preference and let AI find perfect matches</p>
+                </div>
+                <div class="space-y-4">
+                    <button id="movies-btn" class="w-full modal-content hover:bg-netflix-gray/50 p-6 rounded-xl flex items-center transition-all duration-300 group button-hover-effect transform hover:scale-105">
+                        <div class="w-14 h-14 bg-netflix-red/20 rounded-xl flex items-center justify-center mr-4 group-hover:bg-netflix-red/30 transition-colors">
+                            <i class="fas fa-film text-netflix-red text-2xl"></i>
+                        </div>
+                        <div class="text-left flex-1">
+                            <h3 class="font-bold text-lg">Movies</h3>
+                            <p class="text-gray-400 text-sm">Feature films and blockbusters</p>
+                        </div>
+                        <i class="fas fa-arrow-right text-gray-400 group-hover:text-netflix-red group-hover:translate-x-2 transition-all"></i>
+                    </button>
+                    
+                    <button id="tv-btn" class="w-full modal-content hover:bg-netflix-gray/50 p-6 rounded-xl flex items-center transition-all duration-300 group button-hover-effect transform hover:scale-105">
+                        <div class="w-14 h-14 bg-blue-500/20 rounded-xl flex items-center justify-center mr-4 group-hover:bg-blue-500/30 transition-colors">
+                            <i class="fas fa-tv text-blue-400 text-2xl"></i>
+                        </div>
+                        <div class="text-left flex-1">
+                            <h3 class="font-bold text-lg">TV Shows</h3>
+                            <p class="text-gray-400 text-sm">Series and episodes</p>
+                        </div>
+                        <i class="fas fa-arrow-right text-gray-400 group-hover:text-blue-400 group-hover:translate-x-2 transition-all"></i>
+                    </button>
+                    
+                    <button id="both-btn" class="w-full bg-netflix-red/10 hover:bg-netflix-red/20 border-2 border-netflix-red/30 p-6 rounded-xl flex items-center transition-all duration-300 group button-hover-effect transform hover:scale-105">
+                        <div class="w-14 h-14 bg-netflix-red/30 rounded-xl flex items-center justify-center mr-4 group-hover:bg-netflix-red/50 transition-colors">
+                            <i class="fas fa-star text-netflix-red text-2xl"></i>
+                        </div>
+                        <div class="text-left flex-1">
+                            <h3 class="font-bold text-lg text-netflix-red">Both Movies & TV Shows</h3>
+                            <p class="text-red-300 text-sm">Get the best of everything</p>
+                        </div>
+                        <i class="fas fa-arrow-right text-netflix-red group-hover:translate-x-2 transition-all"></i>
+                    </button>
+                    
+                    <button id="surprise-btn" class="w-full bg-gradient-to-r from-purple-600/20 to-pink-600/20 hover:from-purple-600/30 hover:to-pink-600/30 border-2 border-purple-500/30 p-6 rounded-xl flex items-center transition-all duration-300 group button-hover-effect transform hover:scale-105">
+                        <div class="w-14 h-14 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-magic text-purple-300 text-2xl"></i>
+                        </div>
+                        <div class="text-left flex-1">
+                            <h3 class="font-bold text-lg text-purple-300">Surprise Me!</h3>
+                            <p class="text-purple-200 text-sm">Let AI choose the perfect surprise</p>
+                        </div>
+                        <i class="fas fa-sparkles text-purple-300 group-hover:translate-x-2 transition-all"></i>
+                    </button>
+                </div>
+                <button id="close-modal" class="w-full mt-8 text-gray-400 hover:text-white transition-all duration-300 py-3 hover:bg-white/5 rounded-lg">
+                    <i class="fas fa-times mr-2"></i>Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Personalization Modal -->
+    <div id="personalization-modal" class="fixed inset-0 modal-backdrop z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="modal-content rounded-2xl p-8 max-w-2xl w-full fade-in max-h-[90vh] overflow-y-auto">
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 bg-gradient-to-r from-netflix-red to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4 floating">
+                        <i class="fas fa-user-cog text-white text-2xl"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold mb-2">Tell us about your preferences</h2>
+                    <p class="text-gray-400">Help our AI find content you'll absolutely love</p>
+                </div>
+
+                <!-- Content Type Display -->
+                <div class="mb-6 text-center">
+                    <span id="selected-content-type" class="bg-netflix-red/20 text-netflix-red px-4 py-2 rounded-full text-sm font-semibold"></span>
+                </div>
+
+                <!-- Genre Selection -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-palette text-netflix-red mr-3"></i>
+                        What genres do you enjoy?
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <button class="genre-btn bg-netflix-gray/30 hover:bg-netflix-red/20 border-2 border-transparent hover:border-netflix-red/50 p-3 rounded-lg transition-all duration-300 text-sm" data-genre="action">
+                            🎬 Action
+                        </button>
+                        <button class="genre-btn bg-netflix-gray/30 hover:bg-netflix-red/20 border-2 border-transparent hover:border-netflix-red/50 p-3 rounded-lg transition-all duration-300 text-sm" data-genre="comedy">
+                            😂 Comedy
+                        </button>
+                        <button class="genre-btn bg-netflix-gray/30 hover:bg-netflix-red/20 border-2 border-transparent hover:border-netflix-red/50 p-3 rounded-lg transition-all duration-300 text-sm" data-genre="drama">
+                            🎭 Drama
+                        </button>
+                        <button class="genre-btn bg-netflix-gray/30 hover:bg-netflix-red/20 border-2 border-transparent hover:border-netflix-red/50 p-3 rounded-lg transition-all duration-300 text-sm" data-genre="horror">
+                            👻 Horror
+                        </button>
+                        <button class="genre-btn bg-netflix-gray/30 hover:bg-netflix-red/20 border-2 border-transparent hover:border-netflix-red/50 p-3 rounded-lg transition-all duration-300 text-sm" data-genre="romance">
+                            💕 Romance
+                        </button>
+                        <button class="genre-btn bg-netflix-gray/30 hover:bg-netflix-red/20 border-2 border-transparent hover:border-netflix-red/50 p-3 rounded-lg transition-all duration-300 text-sm" data-genre="sci-fi">
+                            🚀 Sci-Fi
+                        </button>
+                        <button class="genre-btn bg-netflix-gray/30 hover:bg-netflix-red/20 border-2 border-transparent hover:border-netflix-red/50 p-3 rounded-lg transition-all duration-300 text-sm" data-genre="thriller">
+                            🔥 Thriller
+                        </button>
+                        <button class="genre-btn bg-netflix-gray/30 hover:bg-netflix-red/20 border-2 border-transparent hover:border-netflix-red/50 p-3 rounded-lg transition-all duration-300 text-sm" data-genre="fantasy">
+                            🧙 Fantasy
+                        </button>
+                        <button class="genre-btn bg-netflix-gray/30 hover:bg-netflix-red/20 border-2 border-transparent hover:border-netflix-red/50 p-3 rounded-lg transition-all duration-300 text-sm" data-genre="adventure">
+                            ⛰️ Adventure
+                        </button>
+                        <button class="genre-btn bg-netflix-gray/30 hover:bg-netflix-red/20 border-2 border-transparent hover:border-netflix-red/50 p-3 rounded-lg transition-all duration-300 text-sm" data-genre="animation">
+                            🎨 Animation
+                        </button>
+                        <button class="genre-btn bg-netflix-gray/30 hover:bg-netflix-red/20 border-2 border-transparent hover:border-netflix-red/50 p-3 rounded-lg transition-all duration-300 text-sm" data-genre="crime">
+                            🔍 Crime
+                        </button>
+                        <button class="genre-btn bg-netflix-gray/30 hover:bg-netflix-red/20 border-2 border-transparent hover:border-netflix-red/50 p-3 rounded-lg transition-all duration-300 text-sm" data-genre="documentary">
+                            📚 Documentary
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Language Preference -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-globe text-green-400 mr-3"></i>
+                        Preferred Languages
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <button class="language-btn bg-netflix-gray/30 hover:bg-green-500/20 border-2 border-transparent hover:border-green-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-language="English">
+                            🇺🇸 English
+                        </button>
+                        <button class="language-btn bg-netflix-gray/30 hover:bg-green-500/20 border-2 border-transparent hover:border-green-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-language="Spanish">
+                            🇪🇸 Spanish
+                        </button>
+                        <button class="language-btn bg-netflix-gray/30 hover:bg-green-500/20 border-2 border-transparent hover:border-green-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-language="French">
+                            🇫🇷 French
+                        </button>
+                        <button class="language-btn bg-netflix-gray/30 hover:bg-green-500/20 border-2 border-transparent hover:border-green-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-language="German">
+                            🇩🇪 German
+                        </button>
+                        <button class="language-btn bg-netflix-gray/30 hover:bg-green-500/20 border-2 border-transparent hover:border-green-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-language="Italian">
+                            🇮🇹 Italian
+                        </button>
+                        <button class="language-btn bg-netflix-gray/30 hover:bg-green-500/20 border-2 border-transparent hover:border-green-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-language="Japanese">
+                            🇯🇵 Japanese
+                        </button>
+                        <button class="language-btn bg-netflix-gray/30 hover:bg-green-500/20 border-2 border-transparent hover:border-green-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-language="Korean">
+                            🇰🇷 Korean
+                        </button>
+                        <button class="language-btn bg-netflix-gray/30 hover:bg-green-500/20 border-2 border-transparent hover:border-green-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-language="Hindi">
+                            🇮🇳 Hindi
+                        </button>
+                        <button class="language-btn bg-netflix-gray/30 hover:bg-green-500/20 border-2 border-transparent hover:border-green-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-language="Any">
+                            🌍 Any Language
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Runtime Preference -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-clock text-purple-400 mr-3"></i>
+                        How much time do you have?
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <button class="runtime-btn bg-netflix-gray/30 hover:bg-purple-500/20 border-2 border-transparent hover:border-purple-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-runtime="short">
+                            ⚡ Quick Watch (< 90 min)
+                        </button>
+                        <button class="runtime-btn bg-netflix-gray/30 hover:bg-purple-500/20 border-2 border-transparent hover:border-purple-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-runtime="medium">
+                            🎬 Standard (90-150 min)
+                        </button>
+                        <button class="runtime-btn bg-netflix-gray/30 hover:bg-purple-500/20 border-2 border-transparent hover:border-purple-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-runtime="long">
+                            🍿 Epic (150+ min)
+                        </button>
+                        <button class="runtime-btn bg-netflix-gray/30 hover:bg-purple-500/20 border-2 border-transparent hover:border-purple-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-runtime="any">
+                            ⏰ Any Length
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Content Rating Preference -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-shield-alt text-orange-400 mr-3"></i>
+                        Content Rating
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <button class="content-rating-btn bg-netflix-gray/30 hover:bg-orange-500/20 border-2 border-transparent hover:border-orange-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-rating="G">
+                            👶 G - All Ages
+                        </button>
+                        <button class="content-rating-btn bg-netflix-gray/30 hover:bg-orange-500/20 border-2 border-transparent hover:border-orange-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-rating="PG">
+                            👨‍👩‍👧‍👦 PG - Family
+                        </button>
+                        <button class="content-rating-btn bg-netflix-gray/30 hover:bg-orange-500/20 border-2 border-transparent hover:border-orange-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-rating="PG-13">
+                            🧒 PG-13 - Teen
+                        </button>
+                        <button class="content-rating-btn bg-netflix-gray/30 hover:bg-orange-500/20 border-2 border-transparent hover:border-orange-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-rating="R">
+                            🔞 R - Adult
+                        </button>
+                        <button class="content-rating-btn bg-netflix-gray/30 hover:bg-orange-500/20 border-2 border-transparent hover:border-orange-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-rating="Any">
+                            📺 Any Rating
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Era Preference -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-calendar text-blue-400 mr-3"></i>
+                        Which era do you prefer?
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <button class="era-btn bg-netflix-gray/30 hover:bg-blue-500/20 border-2 border-transparent hover:border-blue-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-era="2020s">
+                            🔥 Latest (2020s)
+                        </button>
+                        <button class="era-btn bg-netflix-gray/30 hover:bg-blue-500/20 border-2 border-transparent hover:border-blue-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-era="2010s">
+                            ⭐ Modern (2010s)
+                        </button>
+                        <button class="era-btn bg-netflix-gray/30 hover:bg-blue-500/20 border-2 border-transparent hover:border-blue-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-era="2000s">
+                            💫 2000s
+                        </button>
+                        <button class="era-btn bg-netflix-gray/30 hover:bg-blue-500/20 border-2 border-transparent hover:border-blue-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-era="90s">
+                            🎬 90s
+                        </button>
+                        <button class="era-btn bg-netflix-gray/30 hover:bg-blue-500/20 border-2 border-transparent hover:border-blue-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-era="80s">
+                            🕺 80s
+                        </button>
+                        <button class="era-btn bg-netflix-gray/30 hover:bg-blue-500/20 border-2 border-transparent hover:border-blue-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-era="classic">
+                            🏛️ Classic
+                        </button>
+                        <button class="era-btn bg-netflix-gray/30 hover:bg-blue-500/20 border-2 border-transparent hover:border-blue-400/50 p-3 rounded-lg transition-all duration-300 text-sm" data-era="any">
+                            ⏰ Any Time
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Rating Preference -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-star text-yellow-400 mr-3"></i>
+                        Minimum rating preference
+                    </h3>
+                    <div class="flex items-center space-x-4">
+                        <input type="range" id="rating-slider" min="0" max="10" value="6" step="0.5" class="flex-1 h-2 bg-netflix-gray rounded-lg appearance-none cursor-pointer">
+                        <span id="rating-value" class="bg-netflix-red text-white px-3 py-1 rounded-full text-sm font-semibold min-w-[60px] text-center">6.0+</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-400 mt-2">
+                        <span>Any rating</span>
+                        <span>Top rated only</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex space-x-4">
+                    <button id="back-to-content-type" class="flex-1 bg-netflix-gray/50 hover:bg-netflix-gray text-white px-6 py-3 rounded-lg transition-all duration-300">
+                        <i class="fas fa-arrow-left mr-2"></i>Back
+                    </button>
+                    <button id="get-personalized-recommendations" class="flex-2 bg-netflix-red hover:bg-red-700 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 button-hover-effect pulse-glow transform hover:scale-105">
+                        <i class="fas fa-magic mr-2"></i>Get My Recommendations
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trending Section -->
+    <section id="trending" class="py-20 bg-netflix-black relative">
+        <div class="section-divider"></div>
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4 gradient-text">Trending Now</h2>
+                <p class="text-gray-400 text-lg">Discover what's hot and popular right now</p>
+            </div>
+            <div id="trending-grid" class="card-grid-animation">
+                <!-- Loading shimmer effect -->
+                <div class="trending-loader grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    <div class="h-64 bg-netflix-gray/20 rounded-lg content-shimmer"></div>
+                    <div class="h-64 bg-netflix-gray/20 rounded-lg content-shimmer"></div>
+                    <div class="h-64 bg-netflix-gray/20 rounded-lg content-shimmer"></div>
+                    <div class="h-64 bg-netflix-gray/20 rounded-lg content-shimmer"></div>
+                    <div class="h-64 bg-netflix-gray/20 rounded-lg content-shimmer"></div>
+                    <div class="h-64 bg-netflix-gray/20 rounded-lg content-shimmer"></div>
+                </div>
+            </div>
+        </div>
+        <div class="absolute top-10 right-20 w-20 h-20 bg-gradient-to-r from-netflix-red/20 to-pink-500/20 rounded-full floating"></div>
+    </section>
+
+    <!-- Recommendations Section -->
+    <section id="recommendations" class="py-20 bg-netflix-black hidden relative">
+        <div class="section-divider"></div>
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4 gradient-text">Recommended For You</h2>
+                <p class="text-gray-400 text-lg">AI-curated picks based on your preferences</p>
+            </div>
+            <div id="recommendations-grid" class="card-grid-animation">
+                <!-- Recommendations will be loaded here -->
+            </div>
+            <div class="text-center mt-12">
+                <button id="more-recommendations" class="bg-netflix-red hover:bg-red-700 text-white px-10 py-4 rounded-lg font-semibold transition-all duration-300 button-hover-effect pulse-glow transform hover:scale-105">
+                    <i class="fas fa-sync-alt mr-3"></i>
+                    Get More Recommendations
+                </button>
+            </div>
+        </div>
+        <div class="absolute bottom-20 left-10 w-16 h-16 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full floating animation-delay-1000"></div>
+    </section>
+
+    <!-- Loading State -->
+    <div id="loading" class="fixed inset-0 modal-backdrop z-40 hidden">
+        <div class="flex items-center justify-center min-h-screen">
+            <div class="text-center fade-in modal-content p-8 rounded-2xl">
+                <div class="relative mb-6">
+                    <div class="loading-spinner mx-auto"></div>
+                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                        <i class="fas fa-magic text-netflix-red text-lg"></i>
+                    </div>
+                </div>
+                <h3 class="text-2xl font-bold mb-3 gradient-text">Finding Perfect Matches...</h3>
+                <p class="text-gray-400 mb-4">AI is analyzing millions of options just for you</p>
+                <div class="flex justify-center space-x-2">
+                    <div class="w-2 h-2 bg-netflix-red rounded-full animate-bounce"></div>
+                    <div class="w-2 h-2 bg-netflix-red rounded-full animate-bounce animation-delay-200"></div>
+                    <div class="w-2 h-2 bg-netflix-red rounded-full animate-bounce animation-delay-400"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Smooth scrolling function
+        function scrollTo(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }
+
+        // Netflix App Class
+        class NetflixApp {
+            constructor() {
+                this.currentContentType = null;
+                this.userPreferences = {
+                    content_type: '',
+                    genres: [],
+                    languages: [],
+                    runtime: '',
+                    content_rating: '',
+                    era_preference: '',
+                    min_rating: 6.0
+                };
+                this.init();
+            }
+
+            init() {
+                this.setupNavbar();
+                this.setupEventListeners();
+                this.loadTrendingContent();
+                this.setupPersonalizationControls();
+            }
+
+            setupNavbar() {
+                const navbar = document.getElementById('navbar');
+                window.addEventListener('scroll', () => {
+                    if (window.scrollY > 50) {
+                        navbar.classList.add('navbar-glass');
+                        navbar.style.transform = 'translateY(0)';
+                    } else {
+                        navbar.classList.remove('navbar-glass');
+                        navbar.style.transform = 'translateY(0)';
+                    }
+                });
+            }
+
+            setupEventListeners() {
+                // Get started button
+                document.getElementById('get-started-btn').addEventListener('click', () => {
+                    this.showModal();
+                });
+
+                // Content type selection buttons (now go to personalization)
+                document.getElementById('movies-btn').addEventListener('click', () => {
+                    this.showPersonalizationModal('movie');
+                });
+
+                document.getElementById('tv-btn').addEventListener('click', () => {
+                    this.showPersonalizationModal('tv');
+                });
+
+                document.getElementById('both-btn').addEventListener('click', () => {
+                    this.showPersonalizationModal('both');
+                });
+
+                document.getElementById('surprise-btn').addEventListener('click', () => {
+                    this.getSurpriseRecommendations();
+                });
+
+                // Modal controls
+                document.getElementById('close-modal').addEventListener('click', () => {
+                    this.hideModal();
+                });
+
+                document.getElementById('back-to-content-type').addEventListener('click', () => {
+                    this.hidePersonalizationModal();
+                    this.showModal();
+                });
+
+                document.getElementById('get-personalized-recommendations').addEventListener('click', () => {
+                    this.getPersonalizedRecommendations();
+                });
+
+                document.getElementById('more-recommendations').addEventListener('click', () => {
+                    if (this.currentContentType) {
+                        this.getPersonalizedRecommendations();
+                    }
+                });
+
+                // Close modal on escape
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.hideModal();
+                        this.hidePersonalizationModal();
+                    }
+                });
+            }
+
+            setupPersonalizationControls() {
+                // Genre selection
+                document.querySelectorAll('.genre-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        btn.classList.toggle('selected');
+                        
+                        const genre = btn.dataset.genre;
+                        if (this.userPreferences.genres.includes(genre)) {
+                            this.userPreferences.genres = this.userPreferences.genres.filter(g => g !== genre);
+                        } else {
+                            this.userPreferences.genres.push(genre);
+                        }
+                    });
+                });
+
+                // Language selection
+                document.querySelectorAll('.language-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        btn.classList.toggle('selected');
+                        
+                        const language = btn.dataset.language;
+                        if (!this.userPreferences.languages) this.userPreferences.languages = [];
+                        
+                        if (this.userPreferences.languages.includes(language)) {
+                            this.userPreferences.languages = this.userPreferences.languages.filter(l => l !== language);
+                        } else {
+                            this.userPreferences.languages.push(language);
+                        }
+                    });
+                });
+
+                // Runtime selection
+                document.querySelectorAll('.runtime-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        // Clear other runtime selections
+                        document.querySelectorAll('.runtime-btn').forEach(b => {
+                            b.classList.remove('selected');
+                        });
+                        
+                        // Select this runtime
+                        btn.classList.add('selected');
+                        this.userPreferences.runtime = btn.dataset.runtime;
+                    });
+                });
+
+                // Content rating selection
+                document.querySelectorAll('.content-rating-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        // Clear other content rating selections
+                        document.querySelectorAll('.content-rating-btn').forEach(b => {
+                            b.classList.remove('selected');
+                        });
+                        
+                        // Select this content rating
+                        btn.classList.add('selected');
+                        this.userPreferences.content_rating = btn.dataset.rating;
+                    });
+                });
+
+                // Era selection
+                document.querySelectorAll('.era-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        // Clear other era selections
+                        document.querySelectorAll('.era-btn').forEach(b => {
+                            b.classList.remove('selected');
+                        });
+                        
+                        // Select this era
+                        btn.classList.add('selected');
+                        this.userPreferences.era_preference = btn.dataset.era;
+                    });
+                });
+
+                // Rating slider
+                const ratingSlider = document.getElementById('rating-slider');
+                const ratingValue = document.getElementById('rating-value');
+                
+                ratingSlider.addEventListener('input', (e) => {
+                    const value = parseFloat(e.target.value);
+                    this.userPreferences.min_rating = value;
+                    ratingValue.textContent = value === 0 ? 'Any' : `${value.toFixed(1)}+`;
+                });
+            }
+
+            showModal() {
+                const modal = document.getElementById('content-modal');
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            hideModal() {
+                const modal = document.getElementById('content-modal');
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+
+            showPersonalizationModal(contentType) {
+                this.userPreferences.content_type = contentType;
+                this.hideModal();
+                
+                // Update content type display
+                const contentTypeDisplay = document.getElementById('selected-content-type');
+                const displayText = contentType === 'movie' ? '🎬 Movies' : 
+                                  contentType === 'tv' ? '📺 TV Shows' : 
+                                  '⭐ Movies & TV Shows';
+                contentTypeDisplay.textContent = displayText;
+                
+                // Show personalization modal
+                const personalizationModal = document.getElementById('personalization-modal');
+                personalizationModal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            hidePersonalizationModal() {
+                const modal = document.getElementById('personalization-modal');
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+
+            showLoading() {
+                const loading = document.getElementById('loading');
+                loading.classList.remove('hidden');
+            }
+
+            hideLoading() {
+                const loading = document.getElementById('loading');
+                loading.classList.add('hidden');
+            }
+
+            async loadTrendingContent() {
+                try {
+                    const response = await fetch('/api/trending/movie');
+                    const data = await response.json();
+                    
+                    // Hide loading shimmer
+                    const loader = document.querySelector('.trending-loader');
+                    if (loader) loader.style.display = 'none';
+                    
+                    if (data.success && data.content && data.content.length > 0) {
+                        this.renderContent(data.content.slice(0, 12), 'trending-grid');
+                    } else {
+                        // Fallback to sample data if API fails
+                        this.renderSampleContent('trending-grid');
+                    }
+                } catch (error) {
+                    console.error('Error loading trending content:', error);
+                    // Hide loading shimmer
+                    const loader = document.querySelector('.trending-loader');
+                    if (loader) loader.style.display = 'none';
+                    // Show fallback content
+                    this.renderSampleContent('trending-grid');
+                }
+            }
+
+            async getPersonalizedRecommendations() {
+                this.currentContentType = this.userPreferences.content_type;
+                this.hidePersonalizationModal();
+
+                // Build URL parameters for the recommendations page
+                const params = new URLSearchParams();
+                
+                if (this.userPreferences.genres.length > 0) {
+                    params.set('genres', this.userPreferences.genres.join(','));
+                }
+                if (this.userPreferences.languages.length > 0) {
+                    params.set('languages', this.userPreferences.languages.join(','));
+                }
+                if (this.userPreferences.runtime) {
+                    params.set('runtime', this.userPreferences.runtime);
+                }
+                if (this.userPreferences.content_rating) {
+                    params.set('content_rating', this.userPreferences.content_rating);
+                }
+                if (this.userPreferences.era_preference) {
+                    params.set('years', this.userPreferences.era_preference);
+                }
+                if (this.userPreferences.min_rating > 0) {
+                    params.set('rating', this.userPreferences.min_rating.toString());
+                }
+
+                // Set content types
+                if (this.userPreferences.content_type === 'both') {
+                    params.set('content_types', 'movie,tv');
+                } else {
+                    params.set('content_types', this.userPreferences.content_type);
+                }
+
+                // Redirect to recommendations page
+                window.location.href = `/recommendations?${params.toString()}`;
+            }
+
+            async getSurpriseRecommendations() {
+                this.hideModal();
+                this.showLoading();
+
+                try {
+                    const response = await fetch('/surprise_me');
+                    const data = await response.json();
+
+                    if (data.success && data.recommendations && data.recommendations.length > 0) {
+                        this.displayRecommendations(data.recommendations);
+                        this.showSuccessMessage('🎉 Surprise! Here are some amazing picks for you!');
+                    } else {
+                        // Show fallback surprise recommendations
+                        const surpriseRecs = this.createFallbackRecommendations('movie', 8);
+                        this.displayRecommendations(surpriseRecs);
+                        this.showInfoMessage('✨ Here are some popular surprise picks!');
+                    }
+                } catch (error) {
+                    console.error('Error getting surprise recommendations:', error);
+                    // Show fallback instead of error
+                    const surpriseRecs = this.createFallbackRecommendations('movie', 8);
+                    this.displayRecommendations(surpriseRecs);
+                    this.showInfoMessage('🌟 Showing popular content as your surprise!');
+                } finally {
+                    this.hideLoading();
+                }
+            }
+
+            displayRecommendations(recommendations) {
+                this.renderContent(recommendations, 'recommendations-grid');
+                document.getElementById('recommendations').classList.remove('hidden');
+                scrollTo('recommendations');
+            }
+
+            renderContent(items, gridId) {
+                const grid = document.getElementById(gridId);
+                grid.innerHTML = '';
+                grid.className = 'grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4';
+
+                items.forEach((item, index) => {
+                    const card = this.createNetflixCard(item);
+                    grid.appendChild(card);
+
+                    // Staggered animation
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                        card.style.animationDelay = `${index * 0.1}s`;
+                        card.classList.add('fade-in');
+                    }, index * 100);
+                });
+            }
+
+            createFallbackRecommendations(type, count) {
+                const contentType = type === 'tv' ? 'TV Show' : 'Movie';
+                const genres = ['Action', 'Comedy', 'Drama', 'Thriller', 'Romance', 'Sci-Fi', 'Horror', 'Adventure'];
+                
+                return Array.from({length: count}, (_, i) => ({
+                    id: i + 1000,
+                    title: `Popular ${contentType} ${i + 1}`,
+                    overview: `A highly rated ${contentType.toLowerCase()} from the ${genres[i % genres.length]} genre that you might enjoy watching.`,
+                    vote_average: 7.0 + Math.random() * 2,
+                    release_date: new Date(2020 + Math.floor(Math.random() * 4), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28)).toISOString().split('T')[0],
+                    poster_path: null
+                }));
+            }
+
+            showSuccessMessage(message) {
+                this.showToast(message, 'success');
+            }
+
+            showInfoMessage(message) {
+                this.showToast(message, 'info');
+            }
+
+            showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.className = `fixed top-20 right-4 z-50 p-4 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 max-w-sm`;
+                
+                if (type === 'success') {
+                    toast.className += ' bg-green-600 text-white';
+                } else {
+                    toast.className += ' bg-blue-600 text-white';
+                }
+                
+                toast.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} mr-3"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                document.body.appendChild(toast);
+                
+                // Show toast
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(0)';
+                }, 100);
+                
+                // Hide toast after 4 seconds
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(full)';
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, 300);
+                }, 4000);
+            }
+
+            renderSampleContent(gridId) {
+                const sampleItems = [
+                    { title: 'Sample Movie 1', vote_average: 8.5, release_date: '2023-01-01', poster_path: null },
+                    { title: 'Sample Movie 2', vote_average: 7.8, release_date: '2023-02-01', poster_path: null },
+                    { title: 'Sample Movie 3', vote_average: 8.9, release_date: '2023-03-01', poster_path: null },
+                    { title: 'Sample Movie 4', vote_average: 7.2, release_date: '2023-04-01', poster_path: null },
+                    { title: 'Sample Movie 5', vote_average: 8.1, release_date: '2023-05-01', poster_path: null },
+                    { title: 'Sample Movie 6', vote_average: 7.6, release_date: '2023-06-01', poster_path: null }
+                ];
+                this.renderContent(sampleItems, gridId);
+            }
+
+            createNetflixCard(item) {
+                const card = document.createElement('div');
+                card.className = 'netflix-card cursor-pointer group';
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'all 0.4s ease';
+
+                const posterUrl = item.poster_path 
+                    ? `https://image.tmdb.org/t/p/w400${item.poster_path}`
+                    : this.getPlaceholderImage();
+
+                card.innerHTML = `
+                    <div class="relative rounded-xl overflow-hidden bg-netflix-gray">
+                        <img src="${posterUrl}" alt="${item.title}" class="w-full aspect-[2/3] object-cover rounded-lg bg-[#222] poster-zoom" loading="lazy" onerror="this.src='${this.getPlaceholderImage()}'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+                        
+                        <!-- Play Button -->
+                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 scale-50 group-hover:scale-100">
+                            <div class="w-16 h-16 bg-white/95 rounded-full flex items-center justify-center shadow-2xl hover:bg-netflix-red hover:text-white transition-all duration-300">
+                                <i class="fas fa-play text-black text-2xl ml-1"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Info Panel -->
+                        <div class="absolute bottom-0 left-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
+                            <h3 class="text-white font-bold text-sm mb-2 truncate">${item.title}</h3>
+                            <div class="flex items-center justify-between text-xs text-gray-300 mb-2">
+                                <span class="flex items-center bg-black/30 px-2 py-1 rounded">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    ${item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}
+                                </span>
+                                <span class="bg-black/30 px-2 py-1 rounded">${item.release_date ? item.release_date.substring(0, 4) : 'N/A'}</span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="flex-1 bg-white/20 hover:bg-white/30 text-white text-xs py-1 px-2 rounded transition-colors">
+                                    <i class="fas fa-plus mr-1"></i>Add to List
+                                </button>
+                                <button class="bg-white/20 hover:bg-white/30 text-white text-xs py-1 px-2 rounded transition-colors">
+                                    <i class="fas fa-info"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Rating Badge -->
+                        <div class="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            ${item.vote_average ? (item.vote_average >= 8 ? '🔥 Hot' : item.vote_average >= 7 ? '⭐ Good' : '👍 Popular') : '🆕 New'}
+                        </div>
+                    </div>
+                `;
+
+                // Add click event for card interaction
+                card.addEventListener('click', () => {
+                    this.showItemDetails(item);
+                });
+
+                return card;
+            }
+
+            showItemDetails(item) {
+                // Create a simple modal to show item details
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4';
+                modal.innerHTML = `
+                    <div class="modal-content rounded-2xl p-6 max-w-md w-full fade-in">
+                        <div class="text-center">
+                            <h3 class="text-2xl font-bold mb-4">${item.title}</h3>
+                            <p class="text-gray-400 mb-4">${item.overview || 'No description available.'}</p>
+                            <div class="flex justify-center space-x-4 text-sm text-gray-300 mb-6">
+                                <span class="flex items-center">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    ${item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}
+                                </span>
+                                <span>${item.release_date ? item.release_date.substring(0, 4) : 'N/A'}</span>
+                            </div>
+                            <button onclick="this.closest('.modal-backdrop').remove()" class="bg-netflix-red hover:bg-red-700 text-white px-6 py-2 rounded-lg transition-colors">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                });
+            }
+
+            getPlaceholderImage() {
+                return 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22400%22%20height%3D%22600%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23333333%22/%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20font-family%3D%22Inter%22%20font-size%3D%2224%22%20fill%3D%22%23E50914%22%3ENo%20Image%3C/text%3E%3C/svg%3E';
+            }
+
+            shuffleArray(array) {
+                const shuffled = [...array];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                return shuffled;
+            }
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new NetflixApp();
+        });
+    </script>
+</body>
+</html>
